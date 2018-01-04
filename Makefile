@@ -1,14 +1,14 @@
 all: clean build run
 
 clean:
-	-rm -fR ./a.out
+	-rm -fR ./build
 
 build:
-
-	g++ main.cpp net.cpp neuron.cpp trainingSet.cpp -std=c++17 -Wall -I. -g
+	mkdir build
+	g++ ./src/main.cpp ./src/neuralNet.cpp ./src/neuron.cpp ./src/trainingSet.cpp -std=c++17 -Wall -I. -g -o ./build/a.out
 
 run:
-	./a.out
+	./build/a.out
 
 fill:
 	g++ fill.cpp -std=c++17 -Wall -I. -g
