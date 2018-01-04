@@ -5,15 +5,17 @@
 
 #include "trainingSet.h"
 
-trainingSet::trainingSet(const std::string filename)
+using namespace std;
+
+trainingSet::trainingSet(const string filename)
 {
-   std::ifstream trainingDataFile;
+   ifstream trainingDataFile;
    trainingDataFile.open (filename.c_str());
    do {
       Data tmp;
-      std::string line;
-      std::getline (trainingDataFile, line);
-      std::stringstream ss(line);
+      string line;
+      getline (trainingDataFile, line);
+      stringstream ss(line);
       double val = 0;
       unsigned int i;
       i = 0;
@@ -23,67 +25,33 @@ trainingSet::trainingSet(const std::string filename)
    } while ( !trainingDataFile.eof() );
 }
 
-void trainingSet::getTopology(std::vector<unsigned> &topology)
-{
-   std::string line;
-   std::string label;
 
-   std::getline(trainingDataFile, line);
-   std::stringstream ss(line);
-   ss >> label;
-   if (this->isEOF() || label.compare("topology:") != 0)
-   {
-      abort();
-   }
-
-   while (!ss.eof())
-   {
-      unsigned n;
-      ss >> n;
-      topology.push_back(n);
-   }
-   return;
-}
-
-unsigned trainingSet::getNextInputs(std::vector<double> &inputVals)
+void trainingSet::getVals (vector<double> &inputVals, vector<double> &targetVals)
 {
    inputVals.clear();
+   targetVals.clear();
 
-   std::string line;
-   std::getline(trainingDataFile, line);
-   std::stringstream ss(line);
+   normalizeData ( rand() % (data.size() - 25) );
 
-   std::string label;
-   ss >> label;
-   if (label.compare("in:") == 0) {
-      double oneValue;
-      while (ss >> oneValue) {
-         inputVals.push_back(oneValue);
-      }
-   }
-
-   return inputVals.size();
+   for (unsigned i = 0; i < 24; i++)
+      for (unsigned j = 0; j < 5; j++)
+         inputVals.push_back (normData.at(i).arr.at(j));
+   for (unsigned j = 0; j < 5; j++)
+      targetVals.push_back (normData.at(24).arr.at(j));
 }
 
-unsigned trainingSet::getTargetOutputs(std::vector<double> &targetOutputVals)
+void trainingSet::abnormilize (vector<double> &targetVals, vector<double> &outputVals)
 {
-   targetOutputVals.clear();
-
-   std::string line;
-   std::getline(trainingDataFile, line);
-   std::stringstream ss(line);
-
-   std::string label;
-   ss >> label;
-   if (label.compare("out:") == 0) {
-      double oneValue;
-      while (ss >> oneValue) {
-         targetOutputVals.push_back(oneValue);
-      }
+   for (unsigned i = 0; i < 3; i++) {
+      targetVals[i] = targetVals[i] * normK.avg + normK.avg;
+      outputVals[i] = outputVals[i] * normK.avg + normK.avg;
    }
-
-   return targetOutputVals.size();
+   for (unsigned i = 3; i < 5; i++) {
+      targetVals[i] = 1 / targetVals[i];
+      outputVals[i] = 1 / outputVals[i];
+   }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -91,15 +59,17 @@ unsigned trainingSet::getTargetOutputs(std::vector<double> &targetOutputVals)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-void trainingSet::normalizeData()
+void trainingSet::normalizeData (unsigned rndDay)
 {
-   unsigned normDay = rndDay + 24;
-   normK.avg = data.at(normDay).avg;
-   normK.max = data.at(normDay).max;
-   normK.min = data.at(normDay).min;
-   normK.cnt = data.at(normDay).cnt;
-   normK.vol = data.at(normDay).vol;
-   for (auto d : normData)
-      for (unsigned i = 0; i < d.arr.size(); i++)
-         d.arr.at(i) =  (d.arr.at(i) - normK.arr.at(i)) / normK.arr.at(i);
+   unsigned normDay = rndDay + 23;
+   for (unsigned i = 0; i < 5; i++)
+      normK.arr.at(i) = data.at(normDay).arr.at(i);
+
+   for (unsigned i = 0; i < 25; i++) {
+      normData.at(i).avg = (data.at(i + rndDay).avg - normK.avg) / normK.avg;
+      normData.at(i).max = (data.at(i + rndDay).max - normK.avg) / normK.avg;
+      normData.at(i).min = (data.at(i + rndDay).min - normK.avg) / normK.avg;
+      normData.at(i).cnt = 1 / data.at(i + rndDay).cnt;
+      normData.at(i).vol = 1 / data.at(i + rndDay).vol;
+   }
 }

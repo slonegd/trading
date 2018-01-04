@@ -10,8 +10,9 @@
 void showVectorVals(std::string label, std::vector<double> &v)
 {
    std::cout << label << " ";
+   cout.precision (3);
    for (unsigned i = 0; i < v.size(); i++)
-      std::cout << v[i] << " ";
+      std::cout << '\t' << v[i] << " ";
    std::cout << std::endl;
 }
 
@@ -26,11 +27,13 @@ int main()
    // внутренние
    // первый слой по количеству входов + треть 160
    // второй половина первого 80
+   // третий половина второго 40
    // пока без третьего
    std::vector<unsigned> topology;
    topology.push_back(120);
    topology.push_back(160);
    topology.push_back(80);
+   topology.push_back(40);
    topology.push_back(5);
    NeuralNet net(topology);
 
@@ -39,33 +42,36 @@ int main()
    // тренировка сети по историческим данным
    // задаётся количество проходов
    // проходы беруться рандомно из исторических данных
+   // НЕ СДЕЛАНО
    // по окончанию тренировки проходим по всем данным по порядку, считаем среднюю ошибку
-   std::vector<double> inputVals, targetVals, resultVals;
+   std::vector<double> inputVals, targetVals, resultVals, errors;
    int trainingPass = 0;
-   while (!trainingData.isEOF())
- /*  {
+   while ( trainingPass < 100000)
+   {
       ++trainingPass;
       std::cout << std::endl << "Pass: " << trainingPass << std::endl;
 
-      if (trainingData.getNextInputs(inputVals) != topology[0])
-         break;
-      showVectorVals("Input:", inputVals);
-      net.feedForward(inputVals);
+      trainingData.getVals (inputVals, targetVals);
+      // showVectorVals("Input:", inputVals);
+      net.feedForward (inputVals);
+      net.getResults (resultVals);
+      net.backProp (targetVals);
 
-      trainingData.getTargetOutputs(targetVals);
+      trainingData.abnormilize (targetVals, resultVals);
       showVectorVals("Targets:", targetVals);
-      assert(targetVals.size() == topology.back());
+      showVectorVals("Outputs:", resultVals);
+      errors.clear();
+      for (unsigned i = 0; i < 5; i++)
+         errors.push_back ( (resultVals[i] - targetVals[i]) / targetVals[i] * 100 );
+      showVectorVals("Errors:", errors);
 
-      net.getResults(resultVals);
-      showVectorVals("Outputs", resultVals);
+      // std::cout << "Net average error: " << net.getRecentAverageError() << std::endl;
 
-      net.backProp(targetVals);
-
-      std::cout << "Net average error: " << net.getRecentAverageError() << std::endl;
    }
 
    std::cout << std::endl << "Done" << std::endl;
+
    system("PAUSE");
-   */
+
    return(0);
 }

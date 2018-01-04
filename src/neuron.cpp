@@ -4,10 +4,11 @@
  **/
 
 #include "neuron.h"
+#include <iostream>
 
 
-double neuron::eta   = 0.15; // net learning rate
-double neuron::alpha = 0.5;  // momentum
+double neuron::eta   = 0.01; // net learning rate
+double neuron::alpha = 0.1;  // momentum
 
 neuron::neuron (unsigned numOutputs, unsigned myIndex)
 {
@@ -79,4 +80,5 @@ void neuron::feedForward(const Layer &prevLayer)
    }
 
    outputVal = neuron::activationFunction(sum);
+   // std::cout << outputVal << std::endl;
 }

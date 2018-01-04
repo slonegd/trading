@@ -21,20 +21,19 @@
 #include <fstream>
 #include <sstream>
 
+using namespace std;
+
 class trainingSet
 {
 public:
-   trainingSet(const std::string filename);
+   trainingSet(const string filename);
 
-   bool isEOF() { return trainingDataFile.eof(); }
+   void getVals (vector<double> &inputVals, vector<double> &targetVals);
 
-   void getTopology(std::vector<unsigned> &topology);
+   void abnormilize (vector<double> &targetVals, vector<double> &outputVals);
 
-   unsigned getNextInputs(std::vector<double> &inputVals);
-
-   unsigned getTargetOutputs(std::vector<double> &targetOutputVals);
-
-   double getAvgAt(unsigned n) { return data.at(n).avg; }
+   // для отладки
+   double getAvgAt (unsigned n) { return data.at(n).avg; }
 
 
 private:
@@ -47,22 +46,22 @@ private:
          double cnt;
          double vol;
       };
-      std::array<double, 5> arr;
+      array<double, 5> arr;
    };
    // исторические данные за всё время (из файла)
-   std::vector<Data> data;
+   vector<Data> data;
    // нормализованные исторические данные
    // нормализация происходит путём вычетания и последующего деления
    // на среднее последнего (24) дня 
-   std::array<Data, 25> normData;
+   array<Data, 25> normData;
    // рандомный номер с которого ведётся обучение от 0 до data.size()-25
-   unsigned rndDay;
+   // unsigned rndDay;
    // коэфициент нормализации равен среднему последнего (24) дня 
    Data normK;
 
    // не нужен будет
-   std::ifstream trainingDataFile;
+   ifstream trainingDataFile;
 
    // считает normK и normData из data, начиная с rndDay
-   void normalizeData();
+   void normalizeData (unsigned rndDay);
 };

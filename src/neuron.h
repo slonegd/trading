@@ -42,7 +42,7 @@ private:
 
    static double alpha;
 
-   static double randomWeight() { return rand() / double(RAND_MAX); }
+   static double randomWeight() { return rand() / double(RAND_MAX) / 1000; }
 
    static double activationFunction (double x);
 
